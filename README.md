@@ -29,9 +29,9 @@ SOCKS5 代理，可以让 OpenVPN client 通过这个 SOCKS5 代理连接到中�
 
 - 通道有了，如何使用
 
-OpenVPN 是一个 VPN 软件，如果直接在宿主环境下安装 OpenVPN client，它将接管整个系统的网络通信，除非通过精细化的配置，
-才能区分出哪些目标走代理，哪些不走代理，有时候这样很方便，但如果是在一台日常工作的电脑上只想通过代理访问某些特定目标的话，
-这样反倒很麻烦了。
+OpenVPN 是一个 VPN 软件，如果直接在宿主环境下安装 OpenVPN client，它将接管整个系统的网络通信，需要通过精细化的配置，
+才能区分出哪些目标走代理，哪些不走代理，有时候这样很方便，但如果是在一台日常工作的电脑上的话这样反倒很麻烦了，
+因为通常只有某些特定的软件或者特定的目标需要通过代理来访问。
 
 本项目采用的方案是，在一个 docker 容器里运行 OpenVPN client，同时在其基础上架设一个 SOCKS5 服务器（dante）并暴露给宿主环境。
 
@@ -45,6 +45,8 @@ docker build -t sos .
 ```
 
 ## 启动 docker 容器
+
+在 Windows 的 Docker Desktop 环境下：
 ```cmd
 docker run ^
   --name sos ^
@@ -58,8 +60,8 @@ docker run ^
   --auth-nocache ^
   --socks-proxy 192.168.1.99 7070 ^
   --script-security 2 ^
-  --down /etc/openvpn/down.sh ^
-  --up /sos/up.sh
+  --up /sos/up.sh ^
+  --down /sos/down.sh
 ```
 其中 `socks-proxy` 指向的是已有的 SOCKS5 代理服务。
 
@@ -82,7 +84,8 @@ curl --socks5-hostname 127.0.0.1:7080 ifconfig.co
 - client.ovpn: OpenVPN client 配置文件，从 [VPN Gate 中继服务器列表](https://www.vpngate.net/cn/) 下载得到。
 - Dockerfile: docker 镜像描述文件。
 - sockd.conf: dante 配置文件。
-- up.sh: OpenVPN 连接成功后执行的启动脚本，做了两件事：①调整 DNS 设置；②启动 dante 服务。
+- up.sh: OpenVPN 连接成功后执行的脚本，做了两件事：①调整 DNS 设置；②启动 dante 服务。
+- down.sh: OpenVPN 连接断开后执行的脚本，做了两件事：①恢复 DNS 设置；②关闭 dante 服务。
 
 # 参考资料
 
