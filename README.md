@@ -56,6 +56,7 @@ docker run ^
   -p 7080:1080 ^
   -v "%CD%:/sos" ^
   sos ^
+  --data-ciphers "AES-128-CBC:AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305" ^
   --config /sos/client.ovpn ^
   --auth-nocache ^
   --socks-proxy 192.168.1.99 7070 ^
